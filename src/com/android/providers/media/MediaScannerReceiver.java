@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.provider.Settings;
 
 import java.io.File;
 
@@ -38,28 +39,48 @@ public class MediaScannerReceiver extends BroadcastReceiver
         Uri uri = intent.getData();
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             // scan internal storage
-            scan(context, MediaProvider.INTERNAL_VOLUME);
+            /* modified by Gary. start {{----------------------------------- */
+            Log.v(TAG, "receive ACTION_BOOT_COMPLETED intent.");
+            scan(context, MediaProvider.INTERNAL_VOLUME, null);
+            /* modified by Gary. end   -----------------------------------}} */
         } else {
             if (uri.getScheme().equals("file")) {
                 // handle intents related to external storage
                 String path = uri.getPath();
                 String externalStoragePath = Environment.getExternalStorageDirectory().getPath();
 
+                /* modified by Gary. start {{----------------------------------- */
                 Log.d(TAG, "action: " + action + " path: " + path);
                 if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                    // scan whenever any volume is mounted
-                    scan(context, MediaProvider.EXTERNAL_VOLUME);
+//                    if(path.equals(Environment.getExternalStorageDirectory().toString())
+//                       || ( path.equals(Environment.getFlashStroageDirectory().toString())
+//                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_TF_CARD,0)==1)){
+//                        scan(context, MediaProvider.EXTERNAL_VOLUME, path);
+//                    }
+                    scan(context, MediaProvider.EXTERNAL_VOLUME, path);
                 } else if (action.equals(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE) &&
-                        path != null && path.startsWith(externalStoragePath + "/")) {
-                    scanFile(context, path);
+                        path != null ) {
+                    /* modified by Gary. start {{----------------------------------- */
+                    /* 2011-9-28 13:19:51 */
+                    /* support scaning a directory */
+                    File f = new File(path);
+                    if(f.isDirectory())
+                        scan(context, MediaProvider.EXTERNAL_VOLUME, path);
+                    else
+                        scanFile(context, path);
+                    /* modified by Gary. end   -----------------------------------}} */
                 }
+                /* modified by Gary. end   -----------------------------------}} */
             }
         }
     }
 
-    private void scan(Context context, String volume) {
+        /* modified by Gary. start {{----------------------------------- */
+    private void scan(Context context, String volume, String path) {
         Bundle args = new Bundle();
         args.putString("volume", volume);
+        args.putString("dirpath", path);
+        /* modified by Gary. end   -----------------------------------}} */
         context.startService(
                 new Intent(context, MediaScannerService.class).putExtras(args));
     }    

@@ -45,6 +45,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class MediaScannerService extends Service implements Runnable
 {
@@ -247,14 +248,17 @@ public class MediaScannerService extends Service implements Runnable
                     }
                     else if (MediaProvider.EXTERNAL_VOLUME.equals(volume)) {
                         // scan external storage volumes
-                        directories = mExternalStoragePaths;
+                        directories = new String[] {
+                                arguments.getString("dirpath"),
+                        };
+                        /* modified by Gary. end   -----------------------------------}} */
                     }
 
                     if (directories != null) {
-                        if (false) Log.d(TAG, "start scanning volume " + volume + ": "
+                        if (true) Log.d(TAG, "start scanning volume " + volume + ": "
                                 + Arrays.toString(directories));
                         scan(directories, volume);
-                        if (false) Log.d(TAG, "done scanning volume " + volume);
+                        if (true) Log.d(TAG, "done scanning volume " + volume);
                     }
                 }
             } catch (Exception e) {

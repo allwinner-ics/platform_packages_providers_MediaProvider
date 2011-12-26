@@ -181,6 +181,7 @@ public class MediaProvider extends ContentProvider {
                         StorageVolume.EXTRA_STORAGE_VOLUME);
                 // If primary external storage is ejected, then remove the external volume
                 // notify all cursors backed by data on that volume.
+                Log.d(TAG, "ejected volume is = " + storage.getPath());
                 if (storage.getPath().equals(mExternalStoragePaths[0])) {
                     detachVolume(Uri.parse("content://media/external"));
                     sFolderArtMap.clear();
@@ -212,6 +213,7 @@ public class MediaProvider extends ContentProvider {
                                 db.update("files", values, where, whereArgs);
                                 // now delete the records
                                 db.delete("files", where, whereArgs);
+								Log.d(TAG, "delete rows from database where = " +where+ " whereArgs = " + whereArgs);
                                 // notify on media Uris as well as the files Uri
                                 context.getContentResolver().notifyChange(
                                         Audio.Media.getContentUri(EXTERNAL_VOLUME), null);
@@ -518,7 +520,9 @@ public class MediaProvider extends ContentProvider {
                         try {
                             File origFile = new File(mCurrentThumbRequest.mPath);
                             if (origFile.exists() && origFile.length() > 0) {
+                                Log.d(TAG, "start questing thumb of file" + origFile.toString());
                                 mCurrentThumbRequest.execute();
+                                Log.d(TAG, "end questing thumb");
                             } else {
                                 // original file hasn't been stored yet
                                 synchronized (mMediaThumbQueue) {
@@ -1735,6 +1739,7 @@ public class MediaProvider extends ContentProvider {
      * @return
      */
     private boolean waitForThumbnailReady(Uri origUri) {
+    	Log.d(TAG, "waitForThumbnailReady() : uri = " + origUri);
         Cursor c = this.query(origUri, new String[] { ImageColumns._ID, ImageColumns.DATA,
                 ImageColumns.MINI_THUMB_MAGIC}, null, null, null);
         if (c == null) return false;
@@ -1781,6 +1786,7 @@ public class MediaProvider extends ContentProvider {
 
     private boolean queryThumbnail(SQLiteQueryBuilder qb, Uri uri, String table,
             String column, boolean hasThumbnailId) {
+        Log.d(TAG, "queryThumbnail() : uri = " + uri);
         qb.setTables(table);
         if (hasThumbnailId) {
             // For uri dispatched to this method, the 4th path segment is always
@@ -1938,6 +1944,7 @@ public class MediaProvider extends ContentProvider {
             case IMAGES_THUMBNAILS_ID:
                 hasThumbnailId = true;
             case IMAGES_THUMBNAILS:
+				Log.d(TAG, "query():IMAGES_THUMBNAILS");
                 if (!queryThumbnail(qb, uri, "thumbnails", "image_id", hasThumbnailId)) {
                     return null;
                 }
@@ -2120,6 +2127,7 @@ public class MediaProvider extends ContentProvider {
             case VIDEO_THUMBNAILS_ID:
                 hasThumbnailId = true;
             case VIDEO_THUMBNAILS:
+				Log.d(TAG, "query():VIDEO_THUMBNAILS");
                 if (!queryThumbnail(qb, uri, "videothumbnails", "video_id", hasThumbnailId)) {
                     return null;
                 }
@@ -3167,6 +3175,7 @@ public class MediaProvider extends ContentProvider {
 
     private MediaThumbRequest requestMediaThumbnail(String path, Uri uri, int priority, long magic) {
         synchronized (mMediaThumbQueue) {
+			Log.d(TAG, "requestMediaThumbnail() : path = " + path);
             MediaThumbRequest req = null;
             try {
                 req = new MediaThumbRequest(
@@ -3192,7 +3201,9 @@ public class MediaProvider extends ContentProvider {
 //            return Environment.getDataDirectory()
 //                + "/" + directoryName + "/" + name + preferredExtension;
         } else {
-            return mExternalStoragePaths[0] + "/" + directoryName + "/" + name + preferredExtension;
+            String s = mExternalStoragePaths[0] + "/" + directoryName + "/" + name + preferredExtension;
+			Log.d(TAG, "generateFileName(): path = " + s);
+			return s;
         }
     }
 
