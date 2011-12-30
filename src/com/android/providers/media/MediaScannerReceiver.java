@@ -52,12 +52,11 @@ public class MediaScannerReceiver extends BroadcastReceiver
                 /* modified by Gary. start {{----------------------------------- */
                 Log.d(TAG, "action: " + action + " path: " + path);
                 if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-//                    if(path.equals(Environment.getExternalStorageDirectory().toString())
-//                       || ( path.equals(Environment.getFlashStroageDirectory().toString())
-//                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_TF_CARD,0)==1)){
-//                        scan(context, MediaProvider.EXTERNAL_VOLUME, path);
-//                    }
-                    scan(context, MediaProvider.EXTERNAL_VOLUME, path);
+                    if(path.equals(Environment.getExternalStorageDirectory().toString())
+                       || ( path.contains("sd")
+                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_TF_CARD,1)==1)){
+                        scan(context, MediaProvider.EXTERNAL_VOLUME, path);
+                    }
                 } else if (action.equals(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE) &&
                         path != null ) {
                     /* modified by Gary. start {{----------------------------------- */
