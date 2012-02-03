@@ -54,7 +54,10 @@ public class MediaScannerReceiver extends BroadcastReceiver
                 if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
                     if(path.equals(Environment.getExternalStorageDirectory().toString())
                        || ( path.contains("sd")
-                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_TF_CARD,1)==1)){
+                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_TF_CARD,1)==1)
+                       || ( path.contains("usb")
+                            && Settings.System.getInt(context.getContentResolver(),Settings.System.IS_SCAN_USB_HOST,1)==1)
+                            ){
                         scan(context, MediaProvider.EXTERNAL_VOLUME, path);
                     }
                 } else if (action.equals(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE) &&
